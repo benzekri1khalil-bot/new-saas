@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Digiva — Core Governance Terminal Workspace</title>
+<link rel="stylesheet" href="digiva.css"/>
+<style>
+  .admin-frame-layout { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+  .control-sidebar-block { background: #0B0F19; border-right: 1px solid var(--border); padding: 32px 20px; }
+  .admin-view-node { padding: 48px; display: none; } .admin-view-node.active { display: block; }
+  .cluster-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 44px; }
+</style>
+</head>
+<body>
+  <div class="admin-frame-layout">
+    <aside class="control-sidebar-block">
+      <div style="font-weight:900; font-size:16px; margin-bottom:48px; color:var(--red); letter-spacing:1px;">⚠️ CORE CONTROL TERMINAL</div>
+      <button class="btn btn-secondary btn-full" style="margin-bottom:12px; text-align:left;" onclick="toggleAdminPanel('panel-metrics')">📊 Cluster Telemetry</button>
+      <button class="btn btn-secondary btn-full" style="margin-bottom:12px; text-align:left;" onclick="toggleAdminPanel('panel-directory')">👥 Identity Mapping</button>
+      <button class="btn btn-secondary btn-full" style="margin-bottom:12px; text-align:left;" onclick="toggleAdminPanel('panel-variables')">⚙️ Cluster Variables</button>
+      
+      <div style="margin-top:auto; padding-top:80px;">
+        <button class="btn btn-primary btn-full btn-sm" onclick="logout()">Terminate Master Session</button>
+      </div>
+    </aside>
+
+    <main style="background:var(--bg)">
+      <div id="panel-metrics" class="admin-view-node active">
+        <h2>Cluster Operation Architecture Monitoring Matrix</h2>
+        <p style="color:var(--text3); margin-bottom:36px;">Real-time system telemetry across active client environments.</p>
+        
+        <div class="cluster-summary-grid">
+          <div class="card"><h4>Registered Identity Profiles</h4><h2 style="font-size:32px; margin-top:12px; color:var(--d5);" id="cnt-identities-node">0</h2></div>
+          <div class="card"><h4>Compiled Pipeline Assets</h4><h2 style="font-size:32px; margin-top:12px; color:var(--text);" id="cnt-manifests-node">0</h2></div>
+          <div class="card"><h4>Security Firewall Health</h4><h2 style="font-size:24px; margin-top:16px; color:var(--green)">SECURE NODE</h2></div>
+        </div>
+      </div>
+
+      <div id="panel-directory" class="admin-view-node">
+        <h2>Identity Management Vector Index</h2>
+        <p style="color:var(--text3); margin-bottom:28px;">Direct computational token optimization override configurations.</p>
+        <div class="card"><table style="width:100%; text-align:left; border-collapse:collapse;" id="directory-table-target"></table></div>
+      </div>
+
+      <div id="panel-variables" class="admin-view-node">
+        <h2>Global Configuration Parameter Matrix Settings</h2>
+        <div class="card" style="max-width:760px;">
+          <div class="input-group"><label class="label">Landing Component Hero Context Title</label><input type="text" class="input" id="param-title"/></div>
+          <div class="input-group"><label class="label">Landing Component Hero Subcontext Paragraph Description</label><input type="text" class="input" id="param-sub"/></div>
+          <div class="input-group"><label class="label">Master Cluster Core Authorization API Token Key</label><input type="password" class="input" id="param-api" placeholder="sk-proj-........................................"/></div>
+          <button class="btn btn-primary" onclick="commitGlobalParameterChanges()">Commit Global Infrastructure Alterations</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="digiva-core.js"></script>
+  <script>
+    requireAdmin();
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const usersList = getUsers();
+      const historyList = getHistory();
+      
+      document.getElementById('cnt-identities-node').innerText = usersList.length;
+      document.getElementById('cnt-manifests-node').innerText = historyList.length;
+
+      const currentConfig = getCfg();
+      document.getElementById('param-title').value = currentConfig.heroTitle;
+      document.getElementById('param-sub').value = currentConfig.heroSub;
+      document.getElementById('param-api').value = currentConfig.apiKey || "";
+
+      renderIdentityDirectoryRows();
+    });
+
+    function toggleAdminPanel(panelId) {
+      document.querySelectorAll('.admin-view-node').forEach(p => p.classList.remove('active'));
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    function renderIdentityDirectoryRows() {
+      const activeUsers = getUsers();
+      const tableTarget = document.getElementById('directory-table-target');
+      
+      tableTarget.innerHTML = `
+        <thead style="border-bottom:1px solid var(--border); color:var(--text2)">
+          <tr>
+            <th style="padding:14px;">Entity Profile Name</th>
+            <th style="padding:14px;">Registered Email Address</th>
+            <th style="padding:14px;">Assigned Tier</th>
+            <th style="padding:14px;">Available Computational Tokens</th>
+            <th style="padding:14px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${activeUsers.map(user => `
+            <tr style="border-bottom:1px solid rgba(26,58,92,0.25)">
+              <td style="padding:14px; font-weight:700; color:#fff;">${user.name}</td>
+              <td style="padding:14px;">${user.email}</td>
+              <td style="padding:14px;"><span class="badge badge-blue">${user.plan || "Free Model Tier"}</span></td>
+              <td style="padding:14px;"><strong style="color:var(--d5); font-size:15px;">${user.credits}</strong></td>
+              <td style="padding:14px;"><button class="btn btn-secondary btn-sm" onclick="injectAdministrativeTokens('${user.id}')">Inject +100 Computing Units</button></td>
+            </tr>
+          `).join('')}
+        </tbody>`;
+    }
+
+    function injectAdministrativeTokens(userId) {
+      const list = getUsers();
+      const targetUser = list.find(u => u.id === userId);
+      if (targetUser) {
+        targetUser.credits = (targetUser.credits || 0) + 100;
+        saveUsers(list);
+        renderIdentityDirectoryRows();
+        showToast(`Token balance mutation committed for account: ${targetUser.name}`, "ok");
+      }
+    }
+
+    function commitGlobalParameterChanges() {
+      const activeConfig = getCfg();
+      activeConfig.heroTitle = document.getElementById('param-title').value.trim();
+      activeConfig.heroSub = document.getElementById('param-sub').value.trim();
+      activeConfig.apiKey = document.getElementById('param-api').value.trim();
+      
+      saveCfg(activeConfig);
+      showToast("Cluster synchronization completed. Parameter matrix updated across global contexts.", "ok");
+    }
+  </script>
+</body>
+</html>
