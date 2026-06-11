@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Digiva — Distributed Worker Execution Space</title>
+<link rel="stylesheet" href="digiva.css"/>
+</head>
+<body style="padding:48px; background:#02050A;">
+  <div style="max-width:900px; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
+      <div>
+        <h2 style="font-size:24px; color:#fff;">Distributed Operations Thread Terminal</h2>
+        <p style="color:var(--text3); font-size:14px;">Monitors telemetry packet data structures inside background runtimes.</p>
+      </div>
+      <a href="index.html" class="btn btn-secondary btn-sm">Sever Node Connection Instance</a>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:20px; font-size:18px; color:var(--text2);">Communications Stream Pipeline Frame</h3>
+      <div id="thread-message-box" style="color:var(--text3); font-size:14px; line-height:1.6;">
+        No outstanding support communications pending processing inside the execution loop thread queue.
+      </div>
+    </div>
+  </div>
+
+  <script src="digiva-core.js"></script>
+  <script>
+    requireAdmin();
+    window.addEventListener('DOMContentLoaded', () => {
+      const collectedMessages = getMessages();
+      const monitorBox = document.getElementById('thread-message-box');
+      if (collectedMessages && collectedMessages.length > 0) {
+        monitorBox.innerHTML = collectedMessages.map(msg => `
+          <div style="padding:16px; border-bottom:1px solid var(--border); background:rgba(6,13,26,0.4); margin-bottom:10px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <strong style="color:#fff;">From: ${msg.from} (${msg.email})</strong>
+              <span class="badge badge-blue" style="font-size:10px;">${new Date(msg.time).toLocaleTimeString()}</span>
+            </div>
+            <div style="font-weight:600; color:var(--text2); margin-bottom:4px;">Subject: ${msg.subject}</div>
+            <p style="color:var(--text3); font-size:13px;">${msg.body}</p>
+          </div>
+        `).join('');
+      }
+    });
+  </script>
+</body>
+</html>
