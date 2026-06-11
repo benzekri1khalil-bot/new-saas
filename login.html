@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Digiva — Workspace Authentication Gate</title>
+<link rel="stylesheet" href="digiva.css"/>
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #030712; padding: 20px; }
+  .auth-container { max-width: 440px; width: 100%; background: #0B132B; border: 1px solid #1C2541; padding: 40px; border-radius: 20px; }
+  .view-panel { display: none; } .view-panel.active { display: block; animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+  .error-callout { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: var(--red); padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; display: none; }
+  .error-callout.active { display: block; }
+</style>
+</head>
+<body>
+  <div class="card auth-container">
+    <div id="panel-login" class="view-panel active">
+      <h2 style="margin-bottom:6px; font-size:24px;">Initialize Session</h2>
+      <p style="color:var(--text3); font-size:14px; margin-bottom:28px;">Connect your terminal to the automation engine.</p>
+      
+      <div class="error-callout" id="login-error-box"></div>
+      
+      <div class="input-group">
+        <label class="label">Corporate Email Address</label>
+        <input type="email" class="input" id="login-email" placeholder="khalil@company.com" value="benzekri1khalil@gmail.com"/>
+      </div>
+      <div class="input-group">
+        <label class="label">Security Access Key</label>
+        <input type="password" class="input" id="login-pass" placeholder="••••••••" value="/khalil#brahim/"/>
+      </div>
+      <div class="input-group">
+        <label class="label">Verification Code Token (Admin Only)</label>
+        <input type="text" class="input" id="login-code" placeholder="Required for administrator profiles" value="khattarasafiakhalilbenzekri@"/>
+      </div>
+      
+      <button class="btn btn-primary btn-full" onclick="handleLoginRequest()">Authenticate Session</button>
+      
+      <p style="text-align:center; margin-top:20px; font-size:13px; color:var(--text2);">
+        Need an environment instance? <a href="#" style="color:var(--d5); text-decoration:none;" onclick="toggleAuthView('panel-register')">Register Now</a>
+      </p>
+    </div>
+
+    <div id="panel-register" class="view-panel">
+      <h2 style="margin-bottom:6px; font-size:24px;">Register Profile Node</h2>
+      <p style="color:var(--text3); font-size:14px; margin-bottom:28px;">Create a user workspace entity on the platform cluster.</p>
+      
+      <div class="error-callout" id="register-error-box"></div>
+      
+      <div class="input-group"><label class="label">Full Name</label><input type="text" class="input" id="reg-name" placeholder="John Doe"/></div>
+      <div class="input-group"><label class="label">Target Email Address</label><input type="email" class="input" id="reg-email" placeholder="user@domain.com"/></div>
+      <div class="input-group"><label class="label">Access Password</label><input type="password" class="input" id="reg-pass" placeholder="Minimum 8 characters"/></div>
+      
+      <button class="btn btn-primary btn-full" onclick="handleRegistrationRequest()">Provision Environment Profile</button>
+      <p style="text-align:center; margin-top:20px; font-size:13px;"><a href="#" style="color:var(--d5); text-decoration:none;" onclick="toggleAuthView('panel-login')">Return to Login Link</a></p>
+    </div>
+  </div>
+
+  <script src="digiva-core.js"></script>
+  <script>
+    function toggleAuthView(viewId) {
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+    }
+
+    function handleLoginRequest() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      const code = document.getElementById('login-code').value.trim();
+      const errorBox = document.getElementById('login-error-box');
+      
+      errorBox.classList.remove('active');
+
+      const allUsers = getUsers();
+      const matchedUser = allUsers.find(u => u.email === email && u.pass === pass);
+
+      if (!matchedUser) {
+        errorBox.innerText = "Authentication Failure: Access mapping credentials mismatch found.";
+        errorBox.classList.add('active');
+        return;
+      }
+
+      if (matchedUser.role === 'admin' && matchedUser.code !== code) {
+        errorBox.innerText = "Security Token Challenge Violation: Invalid verification sequence code.";
+        errorBox.classList.add('active');
+        return;
+      }
+
+      sessionStorage.setItem('dg_sess', JSON.stringify({ id: matchedUser.id, role: matchedUser.role }));
+      showToast("Access token validation success. Accessing terminal console...", "ok");
+      
+      setTimeout(() => {
+        window.location.href = matchedUser.role === 'admin' ? 'admin.html' : 'dashboard.html';
+      }, 700);
+    }
+
+    function handleRegistrationRequest() {
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const errorBox = document.getElementById('register-error-box');
+      
+      errorBox.classList.remove('active');
+
+      if (!name || !email || !pass) {
+        errorBox.innerText = "Validation Error: All structural profile initialization fields required.";
+        errorBox.classList.add('active');
+        return;
+      }
+
+      const allUsers = getUsers();
+      if (allUsers.some(u => u.email === email)) {
+        errorBox.innerText = "Conflict Error: Target email entity already registered to a workspace.";
+        errorBox.classList.add('active');
+        return;
+      }
+
+      const registeredNode = {
+        id: "usr_" + Date.now(),
+        name: name,
+        email: email,
+        pass: pass,
+        credits: 10,
+        role: "user",
+        plan: "Starter Plan Tier"
+      };
+
+      allUsers.push(registeredNode);
+      saveUsers(allUsers);
+      showToast("Workspace profile deployed into active user arrays.", "ok");
+      toggleAuthView('panel-login');
+    }
+  </script>
+</body>
+</html>
