@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Digiva — Next Gen Product Datasheets</title>
+<link rel="stylesheet" href="digiva.css"/>
+<style>
+  .hero-wrapper { text-align: center; padding: 140px 24px 100px; background: radial-gradient(circle at 50% 30%, #0E4D92 0%, var(--bg) 65%); position: relative; }
+  .hero-wrapper h1 { font-size: clamp(34px, 5.5vw, 64px); font-weight: 900; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1.5px; }
+  .hero-wrapper p { max-width: 680px; margin: 0 auto 40px; color: var(--text2); font-size: 17px; line-height: 1.7; }
+  .nav-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 40px; border-bottom: 1px solid var(--border); background: rgba(6,13,26,0.85); backdrop-filter: blur(16px); position: sticky; top:0; z-index:1000; }
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; padding: 80px 24px; max-width: 1200px; margin: 0 auto; }
+</style>
+</head>
+<body>
+  <nav class="nav-header">
+    <div style="font-weight:900; font-size:22px; background:var(--grad2); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">DIGIVA V4</div>
+    <div style="display:flex; gap:24px; align-items:center;">
+      <a href="about.html" class="btn btn-secondary btn-sm">Documentation</a>
+      <a href="login.html" class="btn btn-primary btn-sm" id="nav-cta-target">Access Dashboard</a>
+    </div>
+  </nav>
+
+  <section class="hero-wrapper">
+    <span class="badge badge-blue" style="margin-bottom:20px; padding: 6px 12px;">Enterprise Automation Core</span>
+    <h1 id="landing-title">AI-Powered Product Datasheet Generator</h1>
+    <p id="landing-sub">Instantly compile technical layouts for enterprise hardware models, network endpoints, and electronics systems dynamically.</p>
+    <a href="dashboard.html" class="btn btn-primary" style="font-size:16px; padding:14px 32px;" id="landing-btn">⚡ Launch Generator Workspace</a>
+  </section>
+
+  <section class="feature-grid">
+    <div class="card">
+      <div class="badge badge-blue" style="margin-bottom:12px;">Output Engine</div>
+      <h3 style="font-size:18px; margin-bottom:8px;">A4 Portrait Formatting</h3>
+      <p style="color:var(--text3); font-size:14px;">Generates structural compliance layouts exactly matching Cisco enterprise documentation benchmarks perfectly ready for physical printing.</p>
+    </div>
+    <div class="card">
+      <div class="badge badge-green" style="margin-bottom:12px;">Automation</div>
+      <h3 style="font-size:18px; margin-bottom:8px;">Deep AI Specifications</h3>
+      <p style="color:var(--text3); font-size:14px;">Utilizes deep query model architecture pipelines to extract component metrics, performance limits, and device dimensions accurately.</p>
+    </div>
+    <div class="card">
+      <div class="badge badge-blue" style="margin-bottom:12px;">Distribution</div>
+      <h3 style="font-size:18px; margin-bottom:8px;">Export Portability</h3>
+      <p style="color:var(--text3); font-size:14px;">Export raw compiled specification matrix maps cleanly into functional file objects with a single execution target click.</p>
+    </div>
+  </section>
+
+  <script src="digiva-core.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const cfg = getCfg() || DEFAULT_CONFIGURATION;
+      document.getElementById('landing-title').innerText = cfg.heroTitle;
+      document.getElementById('landing-sub').innerText = cfg.heroSub;
+      document.getElementById('landing-btn').innerText = cfg.herobtn || "Launch Workspace";
+      
+      const sessionUser = currentUser();
+      if (sessionUser) {
+        const cta = document.getElementById('nav-cta-target');
+        cta.innerText = "Open Console";
+        cta.href = "dashboard.html";
+      }
+    });
+  </script>
+</body>
+</html>
