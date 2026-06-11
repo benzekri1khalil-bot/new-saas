@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Digiva — Professional Workspace Terminal</title>
+<link rel="stylesheet" href="digiva.css"/>
+<style>
+  .workspace-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  .sidebar-nav-block { background: #0A1424; border-right: 1px solid var(--border); padding: 28px 18px; display: flex; flex-direction: column; }
+  .panel-workspace { padding: 44px; display: none; } .panel-workspace.active { display: block; animation: fadeUp 0.3s ease-out; }
+  .dashboard-nav-item { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text2); padding: 14px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; margin-bottom: 8px; font-size: 14px; transition: 0.2s; }
+  .dashboard-nav-item:hover, .dashboard-nav-item.active { background: var(--bg4); color: var(--d5); }
+  .metric-card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 40px; }
+</style>
+</head>
+<body>
+  <div class="workspace-layout">
+    <aside class="sidebar-nav-block">
+      <div style="font-weight:900; font-size:20px; color:#fff; margin-bottom:36px; padding-left:12px;">DIGIVA CONSOLE</div>
+      <button class="dashboard-nav-item active" onclick="navigateConsolePanel('view-generator')">🛠️ AI Document Engine</button>
+      <button class="dashboard-nav-item" onclick="navigateConsolePanel('view-logs')">📂 Document Registry</button>
+      <button class="dashboard-nav-item" onclick="navigateConsolePanel('view-keys')">🗝️ Platform API Keys</button>
+      
+      <div style="margin-top:auto; padding:12px;">
+        <button class="btn btn-secondary btn-full btn-sm" onclick="logout()">Terminate Console Session</button>
+      </div>
+    </aside>
+
+    <main style="background:var(--bg)">
+      <div id="view-generator" class="panel-workspace active">
+        <h2 style="margin-bottom:6px; font-size:26px;">Compile Technical Datasheet Asset</h2>
+        <p style="color:var(--text3); font-size:14px; margin-bottom:36px;">Provide hardware descriptors below to initialize real-time automated mapping matrices.</p>
+        
+        <div class="metric-card-row">
+          <div class="card"><h4>Available Runtime Balance</h4><h2 style="color:var(--d5); margin-top:10px; font-size:28px;" id="metric-credits-val">0</h2></div>
+          <div class="card"><h4>Subscription Infrastructure Layer</h4><h2 style="color:var(--gold); margin-top:10px; font-size:28px;" id="metric-plan-val">Unassigned</h2></div>
+        </div>
+
+        <div class="card" style="max-width:720px;">
+          <div class="input-group">
+            <label class="label">Product Model Reference Identifier (Variant UUID)</label>
+            <input type="text" class="input" id="input-model-id" placeholder="e.g., WS-C3850-48U-E or ProLiant DL380 Gen10"/>
+          </div>
+          <div class="input-group">
+            <label class="label">Corporate Enterprise Brand Group Manufacturer</label>
+            <input type="text" class="input" id="input-brand-id" placeholder="e.g., Cisco Systems, Hewlett Packard Enterprise"/>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div class="input-group">
+              <label class="label">Target Presentation Localization Language</label>
+              <select class="select" id="input-lang-id"><option value="en">English Corporate Output</option><option value="fr">Français Technique</option></select>
+            </div>
+            <div class="input-group">
+              <label class="label">Visual Branding Color Profile Matrix</label>
+              <select class="select" id="input-theme-id"><option value="classic">Enterprise Architecture Blue</option><option value="carbon">Monochrome Dark Slate</option></select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" style="padding:14px;" onclick="executeDocumentAssemblyPipeline()">Execute High-Availability AI Processing Array</button>
+        </div>
+      </div>
+
+      <div id="view-logs" class="panel-workspace">
+        <h2 style="margin-bottom:24px;">Asset History Index Manifest</h2>
+        <div class="card"><table style="width:100%; border-collapse:collapse; text-align:left;" id="registry-table-body"></table></div>
+      </div>
+
+      <div id="view-keys" class="panel-workspace">
+        <h2 style="margin-bottom:24px;">Workspace Variables Matrix Configuration</h2>
+        <div class="card" style="max-width:640px;">
+          <h3>Localized Endpoint Private Token Override</h3>
+          <p style="color:var(--text3); font-size:13px; margin-top:6px; margin-bottom:20px;">Provide a private OpenAI API runtime configuration vector to override operational token calculation bounds.</p>
+          <div class="input-group">
+            <label class="label">Private OpenAI Key Variable String</label>
+            <input type="password" class="input" id="local-override-token" placeholder="sk-proj-........................................"/>
+          </div>
+          <button class="btn btn-secondary" onclick="persistPrivateVariableOverride()">Commit Local Key Registration</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="digiva-core.js"></script>
+  <script>
+    requireAuth();
+    const activeSessionUser = currentUser();
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (activeSessionUser) {
+        document.getElementById('metric-credits-val').innerText = activeSessionUser.credits;
+        document.getElementById('metric-plan-val').innerText = activeSessionUser.plan;
+        document.getElementById('local-override-token').value = localStorage.getItem(`dg_private_key_${activeSessionUser.id}`) || "";
+        renderRegistryLogs();
+      }
+    });
+
+    function navigateConsolePanel(targetPanelId) {
+      document.querySelectorAll('.panel-workspace').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.dashboard-nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById(targetPanelId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function persistPrivateVariableOverride() {
+      const tokenValue = document.getElementById('local-override-token').value.trim();
+      localStorage.setItem(`dg_private_key_${activeSessionUser.id}`, tokenValue);
+      showToast("Private pipeline variable persistent sequence mapped successfully.", "ok");
+    }
+
+    function renderRegistryLogs() {
+      const historicalItems = getHistory().filter(h => h.userId === activeSessionUser.id);
+      const targetTable = document.getElementById('registry-table-body');
+      
+      if (historicalItems.length === 0) {
+        targetTable.innerHTML = `<tr><td style="padding:24px; color:var(--text3); text-align:center;">No technical assets compiled inside this environment cluster yet.</td></tr>`;
+        return;
+      }
+
+      targetTable.innerHTML = `
+        <thead style="border-bottom:1px solid var(--border); color:var(--text2);">
+          <tr>
+            <th style="padding:14px;">Model Spec Variant</th>
+            <th style="padding:14px;">Manufacturer</th>
+            <th style="padding:14px;">Generated Timestamp</th>
+            <th style="padding:14px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${historicalItems.map(item => `
+            <tr style="border-bottom:1px solid rgba(26,58,92,0.2)">
+              <td style="padding:14px; font-weight:700; color:#fff;">${item.model}</td>
+              <td style="padding:14px;">${item.brand}</td>
+              <td style="padding:14px; font-size:13px; color:var(--text3);">${new Date(item.timestamp).toLocaleString()}</td>
+              <td style="padding:14px;"><a href="${item.fileUrl}" download="${item.model.replace(/\s+/g, '_')}_datasheet.txt" style="color:var(--d5); text-decoration:none; font-weight:600;">Download Manifest</a></td>
+            </tr>
+          `).join('')}
+        </tbody>`;
+    }
+
+    function executeDocumentAssemblyPipeline() {
+      const targetModel = document.getElementById('input-model-id').value.trim();
+      const targetBrand = document.getElementById('input-brand-id').value.trim();
+      
+      if (!targetModel || !targetBrand) {
+        showToast("Execution Halted: Core tracking descriptors cannot match empty strings.", "err");
+        return;
+      }
+
+      if (activeSessionUser.credits <= 0) {
+        showToast("Processing Refused: Account balance contains insufficient tokens.", "err");
+        return;
+      }
+
+      activeSessionUser.credits -= 1;
+      updateUser(activeSessionUser.id, { credits: activeSessionUser.credits });
+      document.getElementById('metric-credits-val').innerText = activeSessionUser.credits;
+
+      const structuralHistoryArray = getHistory();
+      const documentMockPayload = `DIGIVA V4 ENTERPRISE COMPLIANCE TECHNICAL SHEET\nBRAND: ${targetBrand}\nMODEL: ${targetModel}\nTIMESTAMP: ${new Date().toISOString()}\nSTATUS: Verified`;
+      const dataUriAsset = "data:text/plain;charset=utf-8," + encodeURIComponent(documentMockPayload);
+
+      structuralHistoryArray.push({
+        id: "ds_asset_" + Date.now(),
+        userId: activeSessionUser.credits.id || activeSessionUser.id,
+        model: targetModel,
+        brand: targetBrand,
+        timestamp: Date.now(),
+        fileUrl: dataUriAsset
+      });
+
+      saveHistory(structuralHistoryArray);
+      renderRegistryLogs();
+      showToast("Model processed. Asset entry appended to local environment records.", "ok");
+    }
+  </script>
+</body>
+</html>
